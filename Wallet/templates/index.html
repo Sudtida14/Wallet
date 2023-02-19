@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+        <title>Wallet</title>
+    </head>
+    
+    <body onload="lode_wallet()">
+        <div class="container">
+            <table class="table">
+                <h1>Transfer</h1>
+                </tr>
+                <tr>
+                    <th>TX </th>
+                    <td><select class="form form-control" id="tx"></select></td>
+                </tr>
+                <tr>
+                    <th>RX </th>
+                    <td><select class="form form-control" id="rx"></select></td>
+                </tr>
+                <tr>
+                    <th>Ether </th>
+                    <td><input type="number" id="ether" value="1"></td>
+                </tr>
+                <tr>
+                    <th></th>
+                    <td><Button class="btn btn-primary" onclick="transfer()"> Transfer </Button>
+                        <span id="status"></span>
+                    </td>
+                </tr>
+            </table>
+
+            <table class="table">
+                <h1>Show balance</h1>
+                <tr>
+                    <th>Wallet </th>
+                    <td><select class="form form-control" id="wallet"></select></td>
+                    <td><Button class="btn btn-primary" onclick="getWallet()">Transfer </Button></td>
+                </tr>
+                
+                <tr>
+                    <th></th>
+                    <td>
+                        <span id="ether2"></span> ETH</td>
+                </tr>
+            </table>
+        </div>
+        <script>
+            lode_wallet = ()=>{
+                let url = "http://127.0.0.1:5000/getaccounts"
+                fetch(url).then(function (response) {
+                    return response.json()
+                }).then(function (data) {
+                    console.log(data);
+                    let tx_sl = document.getElementById("tx");
+                    let rx_sl = document.getElementById("rx");
+                    let wallet = document.getElementById("wallet");
+
+                    for (i in data) {
+                        let option1 = document.createElement("option");
+                        option1.value = data[i].key;
+                        option1.text = data[i].address;
+                        tx_sl.add(option1);
+
+                        let option = document.createElement("option");
+                        option.value = data[i].address;
+                        option.text = data[i].address;
+                        rx_sl.add(option);
+
+                        let option2 = document.createElement("option");
+                        option2.value = data[i].address;
+                        option2.text = data[i].address;
+                        wallet.add(option2);
+                    }
+                })
+            }
+
+            transfer = ()=>{
+                var sel = document.getElementById("tx");
+                var tx = sel.options[sel.selectedIndex].text;
+                let key = sel.options[sel.selectedIndex].value;
+
+                let rx = document.getElementById("rx").value;
+                let ether = document.getElementById("ether").value;
+                let data = {
+                    "tx": tx,
+                    "key": key,
+                    "rx": rx,
+                    "ether": ether
+                };
+                console.log(JSON.stringify(data));
+                let url = "http://127.0.0.1:5000/transfer";
+                fetch(url, {
+                    method: 'post',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                }).then(function(response) {
+                    return response.json();
+                }).then(function(data) {
+                    let status = document.getElementById("status")
+                    status.innerHTML = data.status;
+                    console.log(data);
+                });
+            }
+
+            getWallet = ()=>{
+                var sel = document.getElementById("wallet");
+                var tx = sel.options[sel.selectedIndex].text;
+
+                let data = {
+                    "address": tx
+                };
+                console.log(JSON.stringify(data));
+                let url = "http://127.0.0.1:5000/getbalance";
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                }).then(function(response) {
+                    return response.json();
+                }).then(function(data) {
+                    let ether2 = document.getElementById("ether2")
+                    ether2.innerHTML = data.ether;
+                    console.log(data);
+                });
+            }
+        </script>
+    </body>
+    <style>
+        body {
+            background-image: url(https://img.freepik.com/free-vector/hand-painted-watercolor-pastel-sky-background_23-2148902771.jpg);
+            background-size: cover;           
+        }
+        h1 {
+            font-family: cursive; font-weight: bolder;
+            padding-top: 5%;
+        }
+    </style>
+</html>
